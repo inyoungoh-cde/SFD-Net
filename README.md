@@ -58,12 +58,12 @@ Four conditions: density variation only (`none`), then increasing Gaussian noise
 | PIE-Net       | 52.55 / 38.50 | 52.44 / 37.35  | 47.61 / 40.54 | 49.56 / 39.33 |
 | BoundED       | 48.12 / 49.88 | 47.98 / 49.94  | 47.97 / 49.90 | 47.70 / 49.98 |
 | SFC-Net       | 47.92 / 49.84 | 48.64 / 49.53  | 48.27 / 49.69 | 48.03 / 49.80 |
-| MSL-Net       | 59.41 / -     | 59.11 / -      | 56.11 / -     | 52.74 / -     |
+| MSL-Net       | 59.41 / –     | 59.11 / –      | 56.11 / –     | 52.74 / –     |
 | EdgeFormer    | 52.04 / 31.24 | 48.66 / 33.95  | 34.99 / 45.16 | 28.13 / 48.55 |
 | EDWG          | 54.95 / 46.06 | 54.93 / 46.07  | 48.20 / 49.81 | 47.76 / 49.90 |
 | **SFD-Net**   | **61.33** / 36.93 | **60.42** / 39.76 | **58.62** / 40.88 | **57.05** / 41.94 |
 
-SFD-Net leads F1 in every condition (margins of 6.10, 3.26, 4.41, 6.84 pp over the second-best method) while keeping FPR among the lowest.
+SFD-Net leads F1 in every condition while keeping FPR among the lowest.
 
 <p align="center">
   <img src="assets/results_abc.png" alt="Qualitative comparison on ABC" width="100%">
