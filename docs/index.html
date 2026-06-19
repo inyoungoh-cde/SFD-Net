@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<title>SFD-Net: Sharp Feature Detection from Local Geometric Features</title>
+<meta name="description" content="A compact, architecture-agnostic geometric descriptor (LGD) that detects sharp features as discontinuities of the surface-normal field. ECCV 2026.">
+
+<!-- Social preview (used when shared on LinkedIn / X). Replace the URL host once the page is live. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="SFD-Net: Sharp Feature Detection from Local Geometric Features">
+<meta property="og:description" content="A transferable geometric descriptor that detects sharp features and improves any point-cloud backbone. ECCV 2026.">
+<meta property="og:image" content="static/images/teaser.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#ffffff;
+  --bg2:#f6f6f3;
+  --ink:#16181c;
+  --gray:#596073;
+  --faint:#e4e6ea;
+  --rule:#dcdee3;
+  --accent:#e12d1c;        /* detection red — the sharp-feature colour */
+  --accent-ink:#b2210f;
+  --accent-soft:rgba(225,45,28,.07);
+  --maxw:1020px;
+  --display:'Space Grotesk',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--body);font-size:17px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---- signature glyph: three nested scales k0<k1<k2 ---- */
+.glyph{width:1em;height:1em;flex:0 0 auto;vertical-align:-.12em}
+.glyph circle{fill:none;stroke:currentColor;stroke-width:1.4}
+.glyph .q{fill:var(--accent);stroke:none}
+
+/* ---- sticky mini nav ---- */
+.nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--faint)}
+.nav .wrap{display:flex;align-items:center;gap:18px;height:54px}
+.nav .brand{font-family:var(--display);font-weight:700;letter-spacing:-.01em;color:var(--ink);display:flex;align-items:center;gap:9px}
+.nav .brand .glyph{color:var(--ink);font-size:18px}
+.nav .links{margin-left:auto;display:flex;gap:22px;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
+.nav .links a{color:var(--gray)}
+.nav .links a:hover{color:var(--accent);text-decoration:none}
+@media(max-width:640px){.nav .links{display:none}}
+
+/* ---- eyebrow label ---- */
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gray);display:inline-flex;align-items:center;gap:9px}
+.eyebrow .glyph{color:var(--accent);font-size:15px}
+
+/* ---- hero ---- */
+.hero{padding:64px 0 30px;text-align:center}
+.hero h1{font-family:var(--display);font-weight:700;letter-spacing:-.03em;
+  font-size:clamp(2.7rem,8vw,4.7rem);line-height:.98;margin:18px 0 6px}
+.hero .sub{font-family:var(--display);font-weight:500;color:var(--ink);
+  font-size:clamp(1.05rem,2.6vw,1.5rem);line-height:1.3;max-width:760px;margin:0 auto;letter-spacing:-.01em}
+.authors{margin:26px 0 4px;font-size:1.05rem}
+.authors b{font-weight:600}
+.affil{color:var(--gray);font-size:.95rem;font-family:var(--mono);letter-spacing:.01em;line-height:1.65}
+.authors sup,.affil sup{font-size:.6em;font-weight:500;letter-spacing:0}
+
+/* ---- buttons ---- */
+.btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:30px 0 6px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;
+  font-family:var(--mono);font-size:13.5px;font-weight:500;letter-spacing:.01em;
+  border:1px solid var(--ink);background:var(--ink);color:#fff;transition:transform .15s ease,background .15s ease}
+.btn:hover{text-decoration:none;transform:translateY(-2px);background:#000}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:#fff}
+.btn.soft{background:transparent;color:var(--gray);border-color:var(--rule);cursor:default}
+.btn.soft:hover{transform:none;background:transparent}
+.btn .glyph{font-size:15px}
+
+/* ---- generic section ---- */
+section{padding:54px 0;border-top:1px solid var(--faint)}
+section.alt{background:var(--bg2)}
+.h2{font-family:var(--display);font-weight:600;letter-spacing:-.015em;
+  font-size:clamp(1.5rem,3.6vw,2.15rem);margin:.4em 0 .5em;line-height:1.15}
+.lead{color:#2b2e35;font-size:1.08rem}
+.muted{color:var(--gray)}
+
+/* ---- figures ---- */
+figure{margin:26px 0 0}
+figure img{width:100%;height:auto;display:block;border:1px solid var(--faint);border-radius:10px;background:#fff}
+figcaption{font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--gray);
+  margin-top:12px;max-width:840px}
+figcaption b{color:var(--ink);font-weight:500}
+
+/* ---- thesis band ---- */
+.thesis{padding:50px 0}
+.thesis .wrap{max-width:880px}
+.thesis p{font-family:var(--display);font-weight:500;letter-spacing:-.01em;
+  font-size:clamp(1.3rem,3.2vw,1.85rem);line-height:1.34;margin:.2em 0}
+.thesis .accent{color:var(--accent)}
+
+/* ---- highlight cards ---- */
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--faint);
+  border:1px solid var(--faint);border-radius:12px;overflow:hidden;margin-top:30px}
+.card{background:var(--bg);padding:26px 24px}
+section.alt .card{background:var(--bg2)}
+.card .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.card h3{font-family:var(--display);font-weight:600;font-size:1.18rem;margin:12px 0 8px;letter-spacing:-.01em}
+.card p{margin:0;color:var(--gray);font-size:.97rem;line-height:1.6}
+.card .stat{font-family:var(--mono);color:var(--ink);font-weight:500}
+@media(max-width:640px){.cards{grid-template-columns:1fr}}
+
+/* ---- method steps ---- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
+.step .n{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.1em}
+.step h4{font-family:var(--display);font-weight:600;font-size:1.05rem;margin:8px 0 7px;letter-spacing:-.01em}
+.step p{margin:0;color:var(--gray);font-size:.95rem;line-height:1.6}
+.step{border-top:2px solid var(--ink);padding-top:14px}
+@media(max-width:720px){.steps{grid-template-columns:1fr}}
+
+.note{margin-top:30px;padding:18px 20px;border-left:3px solid var(--accent);background:var(--accent-soft);
+  border-radius:0 8px 8px 0;font-size:.97rem;color:#2b2e35}
+.note b{color:var(--ink)}
+
+/* ---- tables ---- */
+.tblwrap{overflow-x:auto;margin-top:26px;border:1px solid var(--faint);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+caption{caption-side:top;text-align:left;font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+  color:var(--gray);padding:14px 16px 0}
+th,td{padding:9px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--faint)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--gray);background:var(--bg2)}
+tbody td{font-family:var(--mono);color:#2b2e35}
+tbody td:first-child{font-family:var(--body);color:var(--ink)}
+tr.ours td{background:var(--accent-soft);color:var(--ink);font-weight:500}
+tr.ours td:first-child{color:var(--accent-ink);font-weight:600}
+.up{color:var(--accent-ink)}
+
+/* ---- bibtex ---- */
+.bib{position:relative;margin-top:24px}
+.bib pre{background:#16181c;color:#e9eaee;border-radius:10px;padding:22px 20px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.65;margin:0}
+.bib .copy{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:12px;
+  background:#2a2d34;color:#cfd2d8;border:1px solid #3a3e47;border-radius:7px;padding:6px 11px;cursor:pointer}
+.bib .copy:hover{background:#34373f;color:#fff}
+
+/* ---- footer ---- */
+footer{border-top:1px solid var(--faint);padding:40px 0 56px;color:var(--gray);font-size:13.5px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
+footer .glyph{font-size:16px;color:var(--ink)}
+
+/* ---- reveal (progressive enhancement: hidden only when JS is on) ---- */
+.js .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .btn:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- reusable signature glyph -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="scale" viewBox="0 0 28 28">
+    <circle cx="14" cy="14" r="12"></circle>
+    <circle cx="14" cy="14" r="8"></circle>
+    <circle cx="14" cy="14" r="4"></circle>
+    <circle class="q" cx="14" cy="14" r="1.9"></circle>
+  </symbol>
+</svg>
+
+<div class="nav">
+  <div class="wrap">
+    <span class="brand"><svg class="glyph"><use href="#scale"/></svg>SFD-Net</span>
+    <span class="links">
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#bibtex">BibTeX</a>
+      <a href="https://github.com/inyoungoh-cde/SFD-Net">Code</a>
+    </span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>ECCV 2026</span>
+    <h1>SFD-Net</h1>
+    <p class="sub">Sharp Feature Detection from Local Geometric Features</p>
+    <p class="authors"><b>Inyoung Oh</b><sup>1,2</sup>, &nbsp;Kwang Hee Ko<sup>1,*</sup></p>
+    <p class="affil"><sup>1</sup>&nbsp;Gwangju Institute of Science and Technology (GIST) &nbsp;&middot;&nbsp; <sup>2</sup>&nbsp;Korea Institute of Science and Technology (KIST)<br><sup>*</sup>&nbsp;Corresponding author</p>
+    <div class="btns">
+      <span class="btn soft"><svg class="glyph"><use href="#scale"/></svg>Paper · arXiv (soon)</span>
+      <a class="btn" href="https://github.com/inyoungoh-cde/SFD-Net">Code</a>
+      <a class="btn ghost" href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap reveal">
+  <!-- TEASER. Swap to a looping video later:
+       <video src="static/video.mp4" autoplay muted loop playsinline style="width:100%;border:1px solid var(--faint);border-radius:10px"></video> -->
+  <figure>
+    <img src="static/images/teaser.png" alt="Zero-shot sharp feature detection on a large real auditorium">
+    <figcaption><b>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale.)</b> No point-wise sharp-feature labels exist for real scans, so semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry that the pseudo-label metric cannot credit.</figcaption>
+  </figure>
+</div>
+
+<div class="thesis reveal">
+  <div class="wrap">
+    <p>Detection fails where a representation gets the geometry wrong. <span class="accent">Find that relation, then supply the explicit cue that fixes it.</span></p>
+    <p class="muted" style="font-family:var(--body);font-weight:400;font-size:1.05rem;line-height:1.7;margin-top:18px">
+      Here the relation is the discontinuity of the surface-normal field, and the cue is a small multi-scale descriptor. The descriptor, not any backbone-specific tuning, is what drives the gains, which is why it carries across architectures and from synthetic CAD to real scans.
+    </p>
+  </div>
+</div>
+
+<section id="abstract" class="alt reveal">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>Abstract</span>
+    <p class="lead" style="margin-top:18px">
+      Sharp features are the loci where a surface's normal field is discontinuous: the creases and corners that define an object's structure. They are also where detection breaks down, because joint density variation and noise destabilize the local statistics detection relies on, and because sharp points are a small minority class. SFD-Net addresses this with the <b>Local Geometric Descriptor (LGD)</b>: per-point normals estimated at three nested neighborhood scales, aggregated as second-moment statistics of normal differences into a compact, scale-aware isotropy cue. Because it operates on normal differences, LGD is invariant to rigid motion, global scale, and normal sign flips, with no explicit alignment. It prepends to any point-cloud backbone without modification: on the ABC benchmark it reaches state-of-the-art F1 across four density-and-noise conditions, improves three independent backbones in a plug-and-play setting, and transfers zero-shot from synthetic CAD to real scans up to three orders of magnitude larger.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="k">Transferable</div>
+        <h3>A descriptor, not an architecture</h3>
+        <p>LGD prepends to PointNet++, RepSurf, and EDWG unmodified, adding <span class="stat">+4.05 to +7.00 F1</span> while cutting FPR by <span class="stat">2.62–9.08</span>. The descriptor drives the gains.</p>
+      </div>
+      <div class="card">
+        <div class="k">State of the art</div>
+        <h3>Leads ABC across every condition</h3>
+        <p>Best F1 in every one of the four density-and-noise settings (<span class="stat">61.33 &rarr; 57.05</span>), including the largest-noise setting.</p>
+      </div>
+      <div class="card">
+        <div class="k">By construction</div>
+        <h3>Invariant without alignment</h3>
+        <p>Operating on normal differences makes LGD invariant to rigid motion, global scale, and normal sign flips, with no orientation propagation.</p>
+      </div>
+      <div class="card">
+        <div class="k">Generalizes</div>
+        <h3>Zero-shot, CAD &rarr; real</h3>
+        <p>Trained only on 10K-point CAD, applied directly to real S3DIS scans up to <span class="stat">7.1M points (~710&times;)</span> with no retraining or subsampling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="method" class="reveal">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>Method</span>
+    <h2 class="h2">The Local Geometric Descriptor</h2>
+    <p class="lead">LGD turns each point into a three-value cue, then hands it to a learned backbone. The geometry is made explicit before learning, rather than left for the network to infer from raw coordinates.</p>
+
+    <figure>
+      <img src="static/images/method.png" alt="SFD-Net overview: LGD generation followed by an enhanced PointNet++">
+      <figcaption><b>Two stages.</b> LGD is computed from multi-scale normal statistics, concatenated with raw coordinates, and fed to an enhanced PointNet++ with two lightweight Transformer blocks and an imbalance-aware loss.</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
+        <h4>Multi-scale PCA normals</h4>
+        <p>Estimate a unit normal at three nested neighborhoods (k = 20, 40, 80). Only directions are kept, giving sign-flip invariance.</p>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h4>Second moments of normal differences</h4>
+        <p>Accumulate weighted outer products of normal differences per scale. Using &Delta;n &Delta;n&#8868; yields rigid-motion and global-scale invariance with no alignment.</p>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <h4>Per-scale isotropy index</h4>
+        <p>Collapse each scale to one isotropy value, low on planar patches and high near creases and corners, and concatenate the three into a compact cue.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>What LGD is, precisely.</b> It is a precomputed geometric cue that complements a learned backbone, not a replacement for learned features, and the pipeline is not end-to-end differentiable. Because the gains come from the descriptor, it transfers across backbones rather than being tied to one. Replacing the PCA step with a learned estimator is left for future work.
+    </div>
+  </div>
+</section>
+
+<section id="results" class="alt reveal">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>Results</span>
+    <h2 class="h2">State of the art on ABC</h2>
+    <p class="lead">Four conditions: density variation only (<span style="font-family:var(--mono);font-size:.9em">none</span>), then increasing Gaussian noise. SFD-Net leads F1 in every condition while keeping FPR among the lowest.</p>
+
+    <div class="tblwrap">
+      <table>
+        <caption>Average F1 &uarr; / FPR &darr; on ABC (%). Bold row: ours.</caption>
+        <thead>
+          <tr><th>Method</th>
+            <th>none F1</th><th>FPR</th>
+            <th>0.12% F1</th><th>FPR</th>
+            <th>0.6% F1</th><th>FPR</th>
+            <th>1.2% F1</th><th>FPR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PointNet++</td><td>50.89</td><td>48.57</td><td>55.02</td><td>45.88</td><td>49.03</td><td>49.35</td><td>50.21</td><td>49.01</td></tr>
+          <tr><td>DGCNN</td><td>49.89</td><td>48.90</td><td>50.65</td><td>48.51</td><td>48.44</td><td>49.58</td><td>47.53</td><td>49.99</td></tr>
+          <tr><td>RepSurf</td><td>55.23</td><td>45.96</td><td>57.16</td><td>43.06</td><td>54.21</td><td>46.55</td><td>48.17</td><td>49.73</td></tr>
+          <tr><td>PointMLP</td><td>54.59</td><td>46.30</td><td>47.53</td><td>50.00</td><td>47.52</td><td>50.01</td><td>47.65</td><td>49.94</td></tr>
+          <tr><td>PIE-Net</td><td>52.55</td><td>38.50</td><td>52.44</td><td>37.35</td><td>47.61</td><td>40.54</td><td>49.56</td><td>39.33</td></tr>
+          <tr><td>BoundED</td><td>48.12</td><td>49.88</td><td>47.98</td><td>49.94</td><td>47.97</td><td>49.90</td><td>47.70</td><td>49.98</td></tr>
+          <tr><td>SFC-Net</td><td>47.92</td><td>49.84</td><td>48.64</td><td>49.53</td><td>48.27</td><td>49.69</td><td>48.03</td><td>49.80</td></tr>
+          <tr><td>MSL-Net</td><td>59.41</td><td>&ndash;</td><td>59.11</td><td>&ndash;</td><td>56.11</td><td>&ndash;</td><td>52.74</td><td>&ndash;</td></tr>
+          <tr><td>EdgeFormer</td><td>52.04</td><td>31.24</td><td>48.66</td><td>33.95</td><td>34.99</td><td>45.16</td><td>28.13</td><td>48.55</td></tr>
+          <tr><td>EDWG</td><td>54.95</td><td>46.06</td><td>54.93</td><td>46.07</td><td>48.20</td><td>49.81</td><td>47.76</td><td>49.90</td></tr>
+          <tr class="ours"><td>SFD-Net (ours)</td><td>61.33</td><td>36.93</td><td>60.42</td><td>39.76</td><td>58.62</td><td>40.88</td><td>57.05</td><td>41.94</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure>
+      <img src="static/images/results_abc.png" alt="Qualitative comparison on ABC">
+      <figcaption><b>ABC (synthetic CAD).</b> EdgeFormer over-detects on smooth faces and EDWG misses structure, while SFD-Net stays close to ground truth.</figcaption>
+    </figure>
+
+    <h2 class="h2" style="margin-top:48px">Architecture-agnostic</h2>
+    <p class="lead">Prepending LGD, with no architectural change, improves every backbone. <span class="muted">LGD + EDWG (60.80 F1) nearly matches full SFD-Net (61.33), confirming the descriptor is the primary driver.</span></p>
+
+    <div class="tblwrap">
+      <table>
+        <caption>Plug-and-play LGD on ABC (density variation only), %.</caption>
+        <thead><tr><th>Backbone</th><th>F1 &uarr;</th><th>FPR &darr;</th><th>&Delta;F1</th><th>&Delta;FPR</th></tr></thead>
+        <tbody>
+          <tr><td>PointNet++</td><td>50.89</td><td>48.57</td><td>&mdash;</td><td>&mdash;</td></tr>
+          <tr class="ours"><td>&nbsp;&nbsp;+ LGD</td><td>57.89</td><td>43.70</td><td class="up">+7.00</td><td class="up">&minus;4.87</td></tr>
+          <tr><td>RepSurf</td><td>55.23</td><td>45.96</td><td>&mdash;</td><td>&mdash;</td></tr>
+          <tr class="ours"><td>&nbsp;&nbsp;+ LGD</td><td>59.28</td><td>43.34</td><td class="up">+4.05</td><td class="up">&minus;2.62</td></tr>
+          <tr><td>EDWG</td><td>54.95</td><td>46.06</td><td>&mdash;</td><td>&mdash;</td></tr>
+          <tr class="ours"><td>&nbsp;&nbsp;+ LGD</td><td>60.80</td><td>36.98</td><td class="up">+5.85</td><td class="up">&minus;9.08</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h2" style="margin-top:48px">Zero-shot transfer to real scans</h2>
+    <p class="lead">Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3DIS scenes (363K to 7.1M points) with no retraining, fine-tuning, or subsampling.</p>
+    <figure>
+      <img src="static/images/zeroshot_s3dis.png" alt="Zero-shot sharp feature detection on a real S3DIS room">
+      <figcaption><b>Real S3DIS room.</b> EDWG floods flat surfaces with false positives; SFD-Net recovers clean wall, partition, and furniture edges.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="bibtex" class="reveal">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>Citation</span>
+    <h2 class="h2">BibTeX</h2>
+    <p class="muted" style="font-size:.97rem">Placeholder — to be replaced with the official ECCV 2026 entry once released.</p>
+    <div class="bib">
+      <button class="copy" onclick="copyBib(this)">Copy</button>
+      <pre id="bib">@inproceedings{oh2026sfdnet,
+  title     = {SFD-Net: Sharp Feature Detection Network Based on Local Geometric Features},
+  author    = {Oh, Inyoung and Ko, Kwang Hee},
+  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span><svg class="glyph"><use href="#scale"/></svg> &nbsp;SFD-Net · ECCV 2026</span>
+    <span class="muted">Template inspired by <a href="https://nerfies.github.io">Nerfies</a> and the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template">Academic Project Page Template</a>.</span>
+  </div>
+</footer>
+
+<script>
+function copyBib(btn){
+  const t=document.getElementById('bib').innerText;
+  navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1400)});
+}
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
