@@ -11,6 +11,7 @@
 <p align="center">
   <img src="assets/teaser.png" alt="SFD-Net teaser" width="100%">
 </p>
+<p align="center"><em>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale). No point-wise sharp-feature labels exist for real scans, so semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry.</em></p>
 
 > **TL;DR.** Sharp features are where the surface-normal field is discontinuous. SFD-Net detects them with a compact, **architecture-agnostic** geometric descriptor (LGD) that you prepend, unmodified, to an existing point-cloud backbone. It reaches state-of-the-art F1 on ABC across four density-and-noise conditions, lifts three independent backbones in a plug-and-play way, and transfers zero-shot from synthetic CAD to real scans.
 
@@ -28,6 +29,7 @@ I don't treat sharp-feature detection as owning a single network. The approach i
   <img src="assets/method.png" alt="SFD-Net overview" width="100%">
   <!-- Source: Fig. 2 (method overview) from the paper. -->
 </p>
+<p align="center"><em>LGD turns local geometry into a three-value cue at three nested scales, concatenated with raw coordinates and fed to an enhanced PointNet++.</em></p>
 
 LGD turns each point into a 3-number cue in three steps:
 
@@ -56,7 +58,7 @@ Four conditions: density variation only (`none`), then increasing Gaussian noise
 | PIE-Net       | 52.55 / 38.50 | 52.44 / 37.35  | 47.61 / 40.54 | 49.56 / 39.33 |
 | BoundED       | 48.12 / 49.88 | 47.98 / 49.94  | 47.97 / 49.90 | 47.70 / 49.98 |
 | SFC-Net       | 47.92 / 49.84 | 48.64 / 49.53  | 48.27 / 49.69 | 48.03 / 49.80 |
-| MSL-Net       | 08.46 / 50.00 | 08.46 / 50.00  | 08.46 / 50.00 | 08.46 / 50.00 |
+| MSL-Net       | 59.41 / -     | 59.11 / -      | 56.11 / -     | 52.74 / -     |
 | EdgeFormer    | 52.04 / 31.24 | 48.66 / 33.95  | 34.99 / 45.16 | 28.13 / 48.55 |
 | EDWG          | 54.95 / 46.06 | 54.93 / 46.07  | 48.20 / 49.81 | 47.76 / 49.90 |
 | **SFD-Net**   | **61.33** / 36.93 | **60.42** / 39.76 | **58.62** / 40.88 | **57.05** / 41.94 |
@@ -67,6 +69,7 @@ SFD-Net leads F1 in every condition (margins of 6.10, 3.26, 4.41, 6.84 pp over t
   <img src="assets/results_abc.png" alt="Qualitative comparison on ABC" width="100%">
   <!-- Source: Fig. 4 (or a Ground Truth + SFD-Net + one baseline crop). -->
 </p>
+<p align="center"><em>ABC (synthetic CAD). EdgeFormer over-detects on smooth faces and EDWG misses structure, while SFD-Net stays close to ground truth.</em></p>
 
 ### Architecture-agnostic: plug-and-play on three backbones (ABC `none`)
 
@@ -89,6 +92,7 @@ Prepending LGD, with no architectural change, improves every backbone. This is t
   <img src="assets/zeroshot_s3dis.png" alt="Zero-shot sharp feature detection on S3DIS" width="100%">
   <!-- Source: Fig. 5 / Fig. S10 (auditorium). -->
 </p>
+<p align="center"><em>Zero-shot on a real S3DIS room. EDWG floods flat surfaces with false positives; SFD-Net recovers clean wall, partition, and furniture edges.</em></p>
 
 Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3DIS scenes (363K to 7.1M points, up to ~710× the training point count) with no retraining, fine-tuning, or subsampling. It recovers wall, partition, furniture, and tiered-seat boundaries while suppressing activations on flat surfaces, where competing methods either miss most structure or flood flat regions with false positives.
 
