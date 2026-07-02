@@ -1,4 +1,4 @@
-# SFD-Net: Sharp Feature Detection from Local Geometric Features
+# SFD-Net: Sharp Feature Detection Network Based on Local Geometric Features
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Venue-ECCV%202026-1f6feb"></a>
