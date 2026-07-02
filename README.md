@@ -73,7 +73,7 @@ SFD-Net leads F1 in every condition while keeping FPR among the lowest.
 
 ### Architecture-agnostic: plug-and-play on three backbones (ABC `none`)
 
-Prepending LGD, with no architectural change, improves every backbone. This is the core point: the **descriptor** drives the gains.
+Prepending LGD, with no architectural change, improves all three backbones. This is the core point: the **descriptor** drives the gains.
 
 | Backbone            | F1 ↑      | FPR ↓     | ΔF1     | ΔFPR    |
 |---------------------|:---------:|:---------:|:-------:|:-------:|
