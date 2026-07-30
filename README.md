@@ -7,11 +7,10 @@
   <a href="#citation"><img src="https://img.shields.io/badge/BibTeX-cite-555"></a>
 </p>
 
-<!-- TEASER: replace with assets/teaser.gif (or .png). Suggested source: cropped zero-shot auditorium (Fig. S10) or a scale/noise sweep. -->
 <p align="center">
-  <img src="assets/teaser.png" alt="SFD-Net teaser" width="100%">
+  <img src="assets/teaser.gif" alt="Rotating point cloud: ground-truth sharp features (red) cross-fade into SFD-Net's point-wise prediction" width="100%">
 </p>
-<p align="center"><em>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale). No point-wise sharp-feature labels exist for real scans, so semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry.</em></p>
+<p align="center"><em>Ground-truth sharp features (red) cross-fade into SFD-Net's prediction &mdash; green correct, red false alarm, orange missed &mdash; over one revolution. <b><a href="https://inyoungoh-cde.github.io/SFD-Net/">Try it live</a></b>: drag the GT&#8596;prediction divider and scrub the noise level yourself on the project page.</em></p>
 
 > **TL;DR.** Sharp features are where the surface-normal field is discontinuous. SFD-Net detects them with a compact, **architecture-agnostic** geometric descriptor (LGD) that you prepend, unmodified, to an existing point-cloud backbone. It reaches state-of-the-art F1 on ABC across four density-and-noise conditions, lifts three independent backbones in a plug-and-play way, and transfers zero-shot from synthetic CAD to real scans.
 
@@ -95,6 +94,11 @@ Prepending LGD, with no architectural change, improves all three backbones. This
 <p align="center"><em>Zero-shot on a real S3DIS room. EDWG floods flat surfaces with false positives; SFD-Net recovers clean wall, partition, and furniture edges.</em></p>
 
 Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3DIS scenes (363K to 7.1M points, up to ~710× the training point count) with no retraining, fine-tuning, or subsampling. It recovers wall, partition, furniture, and tiered-seat boundaries while suppressing activations on flat surfaces, where competing methods either miss most structure or flood flat regions with false positives.
+
+<p align="center">
+  <img src="assets/teaser.png" alt="Zero-shot sharp feature detection on a 7.1M-point auditorium" width="100%">
+</p>
+<p align="center"><em>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale). Semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry.</em></p>
 
 ---
 
