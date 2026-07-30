@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="SFD-Net: Sharp Feature Detection Network Based on Local Geometric Features">
 <meta property="og:description" content="A transferable geometric descriptor that detects sharp features and improves different point-cloud backbones. ECCV 2026.">
-<meta property="og:image" content="static/images/teaser.png">
+<meta property="og:image" content="https://inyoungoh-cde.github.io/SFD-Net/static/videos/hero_loop.jpg">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -170,6 +170,41 @@ footer .glyph{font-size:16px;color:var(--ink)}
   .js .reveal{opacity:1;transform:none;transition:none}
   .btn:hover{transform:none}
 }
+
+/* ---- media loops & interactives (v2) ---- */
+.vframe{width:100%;display:block;border:1px solid var(--faint);border-radius:10px;background:#101010}
+.hero-media{margin:34px auto 0;max-width:960px}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;margin-top:26px}
+@media(max-width:720px){.mrow{grid-template-columns:1fr}}
+
+.demo{max-width:640px;margin:26px auto 0}
+.cmp{position:relative;aspect-ratio:1/1;border:1px solid var(--faint);border-radius:10px;
+  overflow:hidden;background:#101010;touch-action:pan-y;cursor:ew-resize;user-select:none}
+.cmp video{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.cmp .top{clip-path:inset(0 calc(100% - var(--pos,50%)) 0 0)}
+.cmp .bar{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:2px;background:#fff;
+  transform:translateX(-1px);box-shadow:0 0 0 1px rgba(0,0,0,.35);pointer-events:none}
+.cmp .knob{position:absolute;top:50%;left:var(--pos,50%);transform:translate(-50%,-50%);
+  width:38px;height:38px;border-radius:50%;background:#fff;color:#16181c;display:flex;
+  align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;
+  box-shadow:0 1px 6px rgba(0,0,0,.4);pointer-events:none}
+.chip{position:absolute;bottom:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  padding:4px 9px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;pointer-events:none}
+.chip.l{left:10px}.chip.r{right:10px}
+
+.scrub{position:relative;aspect-ratio:1/1;border:1px solid var(--faint);border-radius:10px;
+  overflow:hidden;background:#101010}
+.scrub video{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .18s ease}
+.scrub video.on{opacity:1}
+.scrub .chip{top:10px;bottom:auto;left:10px;right:auto}
+.scrubctl{margin-top:16px}
+.scrubctl input[type=range]{width:100%;accent-color:var(--accent)}
+.scrubticks{display:flex;justify-content:space-between;font-family:var(--mono);
+  font-size:12px;color:var(--gray);margin-top:4px}
+.scrubticks span.on{color:var(--accent-ink);font-weight:600}
+
+.fullvid{max-width:960px;margin:26px auto 0}
+.fullvid video{width:100%;display:block;border:1px solid var(--faint);border-radius:10px;background:#101010}
 </style>
 </head>
 <body>
@@ -191,6 +226,7 @@ footer .glyph{font-size:16px;color:var(--ink)}
       <a href="#abstract">Abstract</a>
       <a href="#method">Method</a>
       <a href="#results">Results</a>
+      <a href="#video">Video</a>
       <a href="#bibtex">BibTeX</a>
       <a href="https://github.com/inyoungoh-cde/SFD-Net">Code</a>
     </span>
@@ -213,11 +249,9 @@ footer .glyph{font-size:16px;color:var(--ink)}
 </header>
 
 <div class="wrap reveal">
-  <!-- TEASER. Swap to a looping video later:
-       <video src="static/video.mp4" autoplay muted loop playsinline style="width:100%;border:1px solid var(--faint);border-radius:10px"></video> -->
-  <figure>
-    <img src="static/images/teaser.png" alt="Zero-shot sharp feature detection on a large real auditorium">
-    <figcaption><b>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale.)</b> No point-wise sharp-feature labels exist for real scans, so semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry that the pseudo-label metric cannot credit.</figcaption>
+  <figure class="hero-media">
+    <video class="vframe" data-loopvid src="static/videos/hero_loop.mp4" poster="static/videos/hero_loop.jpg" muted loop playsinline preload="none" width="1920" height="800" aria-label="A rotating CAD point cloud: ground-truth sharp features in red, cross-fading into SFD-Net's point-wise prediction"></video>
+    <figcaption><b>Twelve seconds, whole paper.</b> Ground-truth sharp features (red) cross-fade into SFD-Net's prediction &mdash; green correct, red false alarm, orange missed &mdash; while the cloud completes one revolution.</figcaption>
   </figure>
 </div>
 
@@ -268,10 +302,16 @@ footer .glyph{font-size:16px;color:var(--ink)}
     <h2 class="h2">The Local Geometric Descriptor</h2>
     <p class="lead">LGD turns each point into a three-value cue, then hands it to a learned backbone. The geometry is made explicit before learning, rather than left for the network to infer from raw coordinates.</p>
 
-    <figure>
-      <img src="static/images/method.png" alt="SFD-Net overview: LGD generation followed by an enhanced PointNet++">
-      <figcaption><b>Two stages.</b> LGD is computed from multi-scale normal statistics, concatenated with raw coordinates, and fed to an enhanced PointNet++ with two lightweight Transformer blocks and an imbalance-aware loss.</figcaption>
-    </figure>
+    <div class="mrow">
+      <figure style="margin-top:0">
+        <img src="static/images/method.png" alt="SFD-Net overview: LGD generation followed by an enhanced PointNet++">
+        <figcaption><b>Two stages.</b> LGD is computed from multi-scale normal statistics, concatenated with raw coordinates, and fed to an enhanced PointNet++ with two lightweight Transformer blocks and an imbalance-aware loss.</figcaption>
+      </figure>
+      <figure style="margin-top:0">
+        <video class="vframe" data-loopvid src="static/videos/loop_lgd.mp4" poster="static/videos/loop_lgd.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-label="The LGD descriptor response on a rotating point cloud, high along creases"></video>
+        <figcaption><b>The descriptor, live.</b> LGD's combined response on a raw cloud &mdash; high (warm) exactly along creases &mdash; computed before any network sees the points.</figcaption>
+      </figure>
+    </div>
 
     <div class="steps">
       <div class="step">
@@ -334,6 +374,17 @@ footer .glyph{font-size:16px;color:var(--ink)}
       <figcaption><b>ABC (synthetic CAD).</b> EdgeFormer over-detects on smooth faces and EDWG misses structure, while SFD-Net stays close to ground truth.</figcaption>
     </figure>
 
+    <h2 class="h2" style="margin-top:48px">Inspect a prediction</h2>
+    <p class="lead">Drag the divider. Left is the ground truth; right is SFD-Net's point-wise decision on the same rotating cloud &mdash; <span class="muted">green correct, red false alarm, orange missed.</span></p>
+    <div class="demo">
+      <div class="cmp" id="cmp" style="--pos:50%">
+        <video data-syncset="cmp" src="static/videos/slider_gt.mp4" poster="static/videos/slider_gt.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <video class="top" data-syncset="cmp" src="static/videos/slider_pred.mp4" poster="static/videos/slider_pred.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <div class="bar"></div><div class="knob">&#8596;</div>
+        <span class="chip l">Ground truth</span><span class="chip r">SFD-Net</span>
+      </div>
+    </div>
+
     <h2 class="h2" style="margin-top:48px">Architecture-agnostic</h2>
     <p class="lead">Prepending LGD, with no architectural change, improves all three backbones. <span class="muted">LGD + EDWG (60.80 F1) nearly matches full SFD-Net (61.33), confirming the descriptor is the primary driver.</span></p>
 
@@ -352,12 +403,50 @@ footer .glyph{font-size:16px;color:var(--ink)}
       </table>
     </div>
 
+    <h2 class="h2" style="margin-top:48px">Turn up the noise</h2>
+    <p class="lead">Slide from clean to 1.2% Gaussian noise. The camera never moves; only the corruption does &mdash; and the detected creases stay put. <span class="muted">Across the full 510-model test set, Average F1 goes 61.33 &rarr; 57.05.</span></p>
+    <div class="demo">
+      <div class="scrub" id="scrub">
+        <video class="on" data-syncset="scrub" src="static/videos/noise_00.mp4" poster="static/videos/noise_00.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <video data-syncset="scrub" src="static/videos/noise_012.mp4" poster="static/videos/noise_012.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <video data-syncset="scrub" src="static/videos/noise_06.mp4" poster="static/videos/noise_06.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <video data-syncset="scrub" src="static/videos/noise_12.mp4" poster="static/videos/noise_12.jpg" muted loop playsinline preload="none" width="1080" height="1080" aria-hidden="true"></video>
+        <span class="chip" id="scrubchip">noise: none</span>
+      </div>
+      <div class="scrubctl">
+        <input type="range" id="scrubrange" min="0" max="3" step="1" value="0" aria-label="Noise level">
+        <div class="scrubticks" id="scrubticks"><span class="on">none</span><span>0.12%</span><span>0.6%</span><span>1.2%</span></div>
+      </div>
+    </div>
+
     <h2 class="h2" style="margin-top:48px">Zero-shot transfer to real scans</h2>
     <p class="lead">Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3DIS scenes (363K to 7.1M points) with no retraining, fine-tuning, or subsampling.</p>
+    <div class="mrow">
+      <figure style="margin-top:0">
+        <video class="vframe" data-loopvid src="static/videos/s3dis_orbit.mp4" poster="static/videos/s3dis_orbit.jpg" muted loop playsinline preload="none" width="1440" height="810" aria-label="Orbit around a real scanned hallway with predicted sharp features in red"></video>
+        <figcaption><b>A real hallway, orbited.</b> SFD-Net's zero-shot prediction on S3DIS <span style="font-family:var(--mono)">Area_1 hallway_4</span> (20K-point subsample), trained only on synthetic CAD.</figcaption>
+      </figure>
+      <figure style="margin-top:0">
+        <img src="static/images/zeroshot_s3dis.png" alt="Zero-shot sharp feature detection on a real S3DIS room">
+        <figcaption><b>Real S3DIS room.</b> EDWG floods flat surfaces with false positives; SFD-Net recovers clean wall, partition, and furniture edges.</figcaption>
+      </figure>
+    </div>
+
     <figure>
-      <img src="static/images/zeroshot_s3dis.png" alt="Zero-shot sharp feature detection on a real S3DIS room">
-      <figcaption><b>Real S3DIS room.</b> EDWG floods flat surfaces with false positives; SFD-Net recovers clean wall, partition, and furniture edges.</figcaption>
+      <img src="static/images/teaser.png" alt="Zero-shot sharp feature detection on a large real auditorium">
+      <figcaption><b>Zero-shot on a 7.1M-point auditorium (~710&times; the training scale.)</b> No point-wise sharp-feature labels exist for real scans, so semantic-boundary pseudo-labels (left) capture only coarse room edges; SFD-Net (right) also recovers the tiered-seat and platform geometry that the pseudo-label metric cannot credit.</figcaption>
     </figure>
+  </div>
+</section>
+
+<section id="video" class="reveal">
+  <div class="wrap">
+    <span class="eyebrow"><svg class="glyph"><use href="#scale"/></svg>Video</span>
+    <h2 class="h2">The 44-second version</h2>
+    <p class="lead">Problem, descriptor, detection, and robustness &mdash; narrated by captions, on a single representative model.</p>
+    <div class="fullvid">
+      <video src="static/videos/sfdnet_full.mp4" poster="static/videos/sfdnet_full.jpg" controls muted playsinline preload="none" width="2560" height="1080"></video>
+    </div>
   </div>
 </section>
 
@@ -390,8 +479,77 @@ function copyBib(btn){
   const t=document.getElementById('bib').innerText;
   navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1400)});
 }
-const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+if ('IntersectionObserver' in window) {
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+}
+
+/* ---- v2: loop playback, comparison slider, noise scrubber ---- */
+(function(){
+  const reduce = typeof matchMedia === 'function' &&
+    matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* standalone loops: play only while on screen */
+  const loops = document.querySelectorAll('[data-loopvid]');
+  if (!reduce && 'IntersectionObserver' in window) {
+    const vio = new IntersectionObserver(es => es.forEach(e => {
+      const v = e.target;
+      if (e.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(()=>{}); }
+      else v.pause();
+    }), { threshold: 0.3 });
+    loops.forEach(v => vio.observe(v));
+  }
+
+  /* frame-locked sets: play together, keep in lockstep with a master */
+  function bindSet(name){
+    const vids = [...document.querySelectorAll('[data-syncset="' + name + '"]')];
+    if (!vids.length) return vids;
+    if (!reduce && 'IntersectionObserver' in window) {
+      const sio = new IntersectionObserver(es => es.forEach(e => {
+        vids.forEach(v => { if (e.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(()=>{}); } else v.pause(); });
+      }), { threshold: 0.3 });
+      sio.observe(vids[0].parentElement);
+      setInterval(() => {
+        if (vids[0].paused) return;
+        const m = vids[0].currentTime;
+        for (let i = 1; i < vids.length; i++)
+          if (Math.abs(vids[i].currentTime - m) > 0.07) vids[i].currentTime = m;
+      }, 400);
+    }
+    return vids;
+  }
+
+  /* comparison slider */
+  const cmp = document.getElementById('cmp');
+  if (cmp) {
+    bindSet('cmp');
+    const set = x => {
+      const r = cmp.getBoundingClientRect();
+      const pos = Math.max(2, Math.min(98, (x - r.left) / r.width * 100));
+      cmp.style.setProperty('--pos', pos + '%');
+    };
+    cmp.addEventListener('pointerdown', e => { cmp.setPointerCapture(e.pointerId); set(e.clientX); });
+    cmp.addEventListener('pointermove', e => { if (e.pressure > 0 || e.buttons) set(e.clientX); });
+  }
+
+  /* noise scrubber */
+  const scrub = document.getElementById('scrub');
+  if (scrub) {
+    const vids = bindSet('scrub');
+    const range = document.getElementById('scrubrange');
+    const ticks = document.getElementById('scrubticks').children;
+    const chip = document.getElementById('scrubchip');
+    const labels = ['none', '0.12%', '0.6%', '1.2%'];
+    range.addEventListener('input', () => {
+      const i = +range.value;
+      vids.forEach((v, k) => v.classList.toggle('on', k === i));
+      [...ticks].forEach((s, k) => s.classList.toggle('on', k === i));
+      chip.textContent = 'noise: ' + labels[i];
+    });
+  }
+})();
 </script>
 </body>
 </html>
