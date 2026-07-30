@@ -174,7 +174,7 @@ footer .glyph{font-size:16px;color:var(--ink)}
 /* ---- media loops & interactives (v2) ---- */
 .vframe{width:100%;height:auto;display:block;border:1px solid var(--faint);border-radius:10px;background:#101010}
 .hero-media{margin:34px auto 0;max-width:960px}
-.mrow{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;margin-top:26px}
+.mrow{display:grid;grid-template-columns:var(--mcols,1fr 1fr);gap:22px;align-items:start;margin-top:26px}
 @media(max-width:720px){.mrow{grid-template-columns:1fr}}
 
 .demo{max-width:640px;margin:26px auto 0}
@@ -302,7 +302,7 @@ footer .glyph{font-size:16px;color:var(--ink)}
     <h2 class="h2">The Local Geometric Descriptor</h2>
     <p class="lead">LGD turns each point into a three-value cue, then hands it to a learned backbone. The geometry is made explicit before learning, rather than left for the network to infer from raw coordinates.</p>
 
-    <div class="mrow">
+    <div class="mrow" style="--mcols:1.8fr 1fr">
       <figure style="margin-top:0">
         <img src="static/images/method.png" alt="SFD-Net overview: LGD generation followed by an enhanced PointNet++">
         <figcaption><b>Two stages.</b> LGD is computed from multi-scale normal statistics, concatenated with raw coordinates, and fed to an enhanced PointNet++ with two lightweight Transformer blocks and an imbalance-aware loss.</figcaption>
@@ -421,7 +421,7 @@ footer .glyph{font-size:16px;color:var(--ink)}
 
     <h2 class="h2" style="margin-top:48px">Zero-shot transfer to real scans</h2>
     <p class="lead">Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3DIS scenes (363K to 7.1M points) with no retraining, fine-tuning, or subsampling.</p>
-    <div class="mrow">
+    <div class="mrow" style="--mcols:1.185fr 1fr">
       <figure style="margin-top:0">
         <video class="vframe" data-loopvid src="static/videos/s3dis_orbit.mp4" poster="static/videos/s3dis_orbit.jpg" muted loop playsinline preload="none" width="1440" height="810" aria-label="Orbit around a real scanned hallway with predicted sharp features in red"></video>
         <figcaption><b>A real hallway, orbited.</b> SFD-Net's zero-shot prediction on S3DIS <span style="font-family:var(--mono)">Area_1 hallway_4</span> (20K-point subsample), trained only on synthetic CAD.</figcaption>
