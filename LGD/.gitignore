@@ -1,0 +1,30 @@
+# Build output
+x64/
+build/
+[Dd]ebug/
+[Rr]elease/
+*.obj
+*.exe
+*.pdb
+*.ipdb
+*.iobj
+*.ilk
+*.log
+*.tlog
+
+# Visual Studio caches and per-user settings
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+
+# Redistributable package (regenerate with make_package.bat,
+# publish the zip as a GitHub Release asset instead of committing it)
+deploy/
+
+# Program output
+output_*/
+
+# Archives (publish release assets on GitHub Releases, not in the repo)
+*.zip

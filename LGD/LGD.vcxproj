@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Release|x64 is the only configuration, so Visual Studio always builds and
+       runs the optimized executable. Debug symbols (.pdb) are still generated,
+       so breakpoints and call stacks work if debugging is ever needed. -->
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{60D5005A-FED6-4FE1-8B4D-E8D2C8D514B4}</ProjectGuid>
+    <RootNamespace>LGD</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <!-- Defaults for a bare "msbuild LGD.sln" on the command line -->
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
+    <Platform Condition="'$(Platform)'==''">x64</Platform>
+    <!-- Building the redistributable package in deploy\ is opt-in: a normal
+         build only produces x64\Release\LGD.exe. Turn it on for a release
+         with /p:MakeDeployPackage=true (see make_package.bat). -->
+    <MakeDeployPackage Condition="'$(MakeDeployPackage)'==''">false</MakeDeployPackage>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)third_party_includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="runner.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="algorithms.h" />
+    <ClInclude Include="FileData.h" />
+    <ClInclude Include="platform.h" />
+    <ClInclude Include="runner.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CMakeLists.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <!-- Refresh deploy\LGD_portable: the executable, the Visual C++ runtime DLLs
+       it needs on machines without Visual Studio, and the documentation
+       templates kept in package\. Missing DLLs raise a warning instead of
+       silently producing a package that will not run.
+       Disabled unless MakeDeployPackage=true, so ordinary builds stay clean. -->
+  <Target Name="UpdateDeployPackage" AfterTargets="Build" Condition="'$(MakeDeployPackage)'=='true'">
+    <PropertyGroup>
+      <DeployDir>$(ProjectDir)deploy\LGD_portable\</DeployDir>
+      <RedistRoot Condition="'$(VCInstallDir)' != ''">$(VCInstallDir)Redist\MSVC\</RedistRoot>
+      <RedistRoot Condition="'$(RedistRoot)' == '' and '$(VSInstallDir)' != ''">$(VSInstallDir)VC\Redist\MSVC\</RedistRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <RuntimeDll Include="$(RedistRoot)*\x64\Microsoft.VC141.CRT\msvcp140.dll" />
+      <RuntimeDll Include="$(RedistRoot)*\x64\Microsoft.VC141.CRT\vcruntime140.dll" />
+      <RuntimeDll Include="$(RedistRoot)*\x64\Microsoft.VC141.OpenMP\vcomp140.dll" />
+      <PackageFile Include="$(ProjectDir)package\**\*" />
+    </ItemGroup>
+    <MakeDir Directories="$(DeployDir)data" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
+    <Copy SourceFiles="@(RuntimeDll)" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageFile)" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
+    <Warning Condition="'@(RuntimeDll)' == ''" Text="Visual C++ runtime DLLs were not found under '$(RedistRoot)'. deploy\LGD_portable will only run on machines that have Visual Studio installed." />
+    <Message Importance="high" Text="Deploy package updated: $(DeployDir)" />
+  </Target>
+</Project>
