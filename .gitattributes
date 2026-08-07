@@ -1,0 +1,22 @@
+# Store all text files with LF in the repository and check them out as LF,
+# so Windows and Linux clones agree and git stops warning about conversions.
+* text=auto eol=lf
+
+# Windows tooling expects CRLF in the working tree
+*.sln             text eol=crlf
+*.vcxproj         text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.props           text eol=crlf
+*.bat             text eol=crlf
+*.cmd             text eol=crlf
+
+# Binary assets - never convert
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.mp4  binary
+*.zip  binary
+*.pdf  binary
+*.exe  binary
+*.dll  binary
