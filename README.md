@@ -112,7 +112,10 @@ Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3D
 
 ## Getting started
 
-> Code release in progress. This section will hold environment setup, data preparation (ABC, S3DIS), and train/eval scripts.
+The LGD descriptor extractor is available now under [`LGD/`](LGD/), with a
+ready-to-run Windows build on the [Releases](../../releases) page.
+
+> Network training and evaluation code is still in progress. This section will hold environment setup, data preparation (ABC, S3DIS), and train/eval scripts.
 
 ```bash
 # placeholder
