@@ -232,8 +232,11 @@ on the `Average Metrics` line.
 ## Results
 
 ABC test split, 510 models, `best_f1_model.pth` for each noise condition.
-Reproduced values come from running the commands above on the released
-checkpoints; the residual gap is the random chunk permutation.
+Reproduced values come from running the commands above on the
+[released checkpoints](https://github.com/inyoungoh-cde/SFD-Net/releases/tag/sfdnet-v1.0)
+— unzip `SFDNet_checkpoints.zip` in this directory and the four run folders
+land under `log/sem_seg/` ready for `test.py`. The residual gap is the random
+chunk permutation.
 
 | Condition | Paper F1 | Reproduced F1 | Paper FPR | Reproduced FPR |
 |---|---:|---:|---:|---:|
