@@ -1,0 +1,27 @@
+# SFD-Net runtime dependencies, pinned to the versions the published results
+# were produced with. Target environment: Python 3.11, Linux x86-64, CUDA 12.4.
+#
+#     uv venv --python 3.11
+#     uv pip install -r requirements.txt
+#
+# torch is pinned by wheel URL rather than through --extra-index-url. The
+# PyTorch index also mirrors numpy, tqdm and setuptools, but at older versions
+# than the ones pinned below; with an extra index in play, resolvers that
+# restrict a package to the first index carrying it would fail on those pins.
+# Naming the wheel directly keeps PyPI as the only index and needs no flags.
+#
+# For Windows, or a different Python version, substitute the matching wheel
+# from https://download.pytorch.org/whl/cu124/torch/ (cp311 = Python 3.11).
+#
+# The CUDA extension `pointnet2_ops` is not listed here: it compiles against
+# the torch this file installs, so it has to be a second step. See the
+# "CUDA extension" section of README.md.
+
+torch @ https://download.pytorch.org/whl/cu124/torch-2.4.1%2Bcu124-cp311-cp311-linux_x86_64.whl
+numpy==2.4.6
+tqdm==4.69.1
+
+# Required in the environment when building pointnet2_ops with
+# --no-build-isolation (step 2 in the README).
+setuptools==83.0.0
+ninja==1.13.0

@@ -1,0 +1,18 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# Runs: checkpoints, logs, predictions (published as GitHub Release assets,
+# not committed to the repo)
+log/
+*.pth
+
+# Datasets
+dataset/
+
+# Archives (publish release assets on GitHub Releases, not in the repo)
+*.zip

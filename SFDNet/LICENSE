@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2026 Inyoung Oh and Kwang Hee Ko
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This project builds on two upstream PointNet++ code bases. Their terms apply to
+the derived portions, which are redistributed here in modified form:
+
+  Pointnet_Pointnet2_pytorch   - MIT License, Copyright (c) 2019 benny
+                                 https://github.com/yanx27/Pointnet_Pointnet2_pytorch
+                                 Origin of the set-abstraction and feature-
+                                 propagation modules in models/, of the
+                                 augmentation helpers in provider.py, and of the
+                                 training and evaluation scaffolding.
+
+  Pointnet2_PyTorch            - The Unlicense (public domain)
+                                 https://github.com/erikwijmans/Pointnet2_PyTorch
+                                 Source of the `pointnet2_ops` CUDA extension,
+                                 installed as a dependency and not vendored here.
+
+The method those modules are derived from was introduced in PointNet++ (Qi,
+Yi, Su, Guibas; NeurIPS 2017).
+
+The standalone LGD extractor under LGD/ carries its own LICENSE file,
+including the terms of the header-only libraries it vendors.
