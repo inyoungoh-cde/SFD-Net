@@ -112,16 +112,18 @@ Trained only on 10K-point synthetic CAD, SFD-Net is applied directly to real S3D
 
 ## Getting started
 
-The LGD descriptor extractor is available now under [`LGD/`](LGD/), with a
-ready-to-run Windows build on the [Releases](../../releases) page.
+The pipeline ships in two parts, matching the two stages of the method:
 
-> Network training and evaluation code is still in progress. This section will hold environment setup, data preparation (ABC, S3DIS), and train/eval scripts.
+- [`LGD/`](LGD/) — the standalone LGD descriptor extractor (C++), with a
+  ready-to-run Windows build on the [Releases](../../releases) page.
+- [`SFDNet/`](SFDNet/) — training and evaluation code for the network
+  (PyTorch), with environment setup, data preparation and the trained
+  checkpoints for all four ABC noise conditions on the
+  [Releases](../../releases) page.
 
 ```bash
-# placeholder
 git clone https://github.com/inyoungoh-cde/SFD-Net.git
-cd SFD-Net
-# environment + instructions coming soon
+cd SFD-Net/SFDNet   # see SFDNet/README.md for setup and usage
 ```
 
 ---
