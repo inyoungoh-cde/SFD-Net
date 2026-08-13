@@ -21,7 +21,7 @@ class DiceLoss(nn.Module):
         return 1.0 - dice_coeff
 
 class FocalTverskyLoss(nn.Module):
-    def __init__(self, alpha=0.7, beta=0.3, gamma=1.33, smooth=1e-6):
+    def __init__(self, alpha=0.8, beta=0.2, gamma=1.5, smooth=1e-6):
         super().__init__()
         self.alpha = alpha
         self.beta  = beta
@@ -45,7 +45,7 @@ class FocalTverskyLoss(nn.Module):
         return loss
 
 class WeightedFTDLoss(nn.Module):
-    def __init__(self, alpha=0.7, beta=0.3, gamma=1.33, smooth=1e-6, w=0.5):
+    def __init__(self, alpha=0.8, beta=0.2, gamma=1.5, smooth=1e-6, w=0.7):
         super().__init__()
         self.ftl = FocalTverskyLoss(alpha=alpha, beta=beta, gamma=gamma, smooth=smooth)
         self.dice = DiceLoss(smooth=smooth)
@@ -135,7 +135,7 @@ class get_model(nn.Module):
         return x, l4_pts
 
 class get_loss(nn.Module):
-    def __init__(self, alpha=0.7, beta=0.3, gamma=0.75, smooth=1e-6, w=0.7):
+    def __init__(self, alpha=0.8, beta=0.2, gamma=1.5, smooth=1e-6, w=0.7):
         super().__init__()
         self.loss_fn = WeightedFTDLoss(alpha=alpha, beta=beta, gamma=gamma, smooth=smooth, w=w)
 
