@@ -38,7 +38,7 @@ LGD turns each point into a 3-number cue in three steps:
 
 The three scales are complementary: the smallest gives acuity on narrow creases, the middle balances localization and stability, the largest suppresses variance from noise and undersampling.
 
-`φ` is concatenated with raw coordinates and fed to an **enhanced PointNet++** (encoder–decoder with two lightweight Transformer blocks) trained with an imbalance-aware **Focal-Tversky + Dice** loss. LGD is precomputed and **attaches to any backbone that accepts per-point channels**, so it works as a drop-in module rather than a fixed architecture.
+`φ` is concatenated with raw coordinates and fed to an **enhanced PointNet++** (encoder–decoder with two lightweight Transformer blocks) trained with an imbalance-aware **Focal-Tversky + Dice** loss. LGD is precomputed and **attaches to backbones that accept per-point channels**, so it works as a drop-in module rather than a fixed architecture.
 
 ---
 
